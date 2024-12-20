@@ -4,8 +4,6 @@ WORKDIR /
 
 COPY package.json yarn.lock ./
 
-RUN yarn add loadable
-
 RUN yarn install --frozen-lockfile
 
 COPY . .
