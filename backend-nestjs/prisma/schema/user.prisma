@@ -1,0 +1,17 @@
+model UserTable {
+  id        String        @id @default(cuid())
+  email     String        @unique
+  is_follow Boolean       @default(false)
+  username  String
+  password  String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime
+  tokens    TokensTable[] 
+}
+
+model TokensTable {
+  id           String     @id @default(cuid())
+  refreshToken String
+  userId       String     
+  user         UserTable  @relation(fields: [userId], references: [id]) 
+}

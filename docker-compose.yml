@@ -1,0 +1,99 @@
+version: '3.8'
+
+networks:
+  dev:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.2/24
+
+volumes:
+  admin-data:
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "172.26.148.182:6379:6379"
+    environment:
+      - REDIS_HOST=172.26.148.182
+      - REDIS_PORT=6379
+      - REDIS_DB=1
+    networks:
+      dev:
+        ipv4_address: 192.168.0.3
+
+  nginx:
+      image: nginx:stable-alpine
+      ports: "80:80"
+      volumes:
+      - './nginx.conf:/etc/nginx/nginx.conf'
+      depends_on: 
+      - fastapi
+      - nestjs
+      - nextjs      
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "172.26.148.182:5432:5432"
+    environment:
+      - DATABASE_URL=postgresql://postgres:inal_2411@172.26.148.182:5432/filmflood
+      - POSTGRES_PASSWORD=inal_2411
+    volumes:
+      - admin-data:/var/lib/postgresql/data
+    networks:
+      dev:
+        ipv4_address: 192.168.0.4
+
+  fastapi:
+    build:
+      context: ./backend-fastapi/
+      dockerfile: Dockerfile
+    container_name: fastapi
+    ports:
+      - "172.26.148.182:8000:8000"
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      dev:
+        ipv4_address: 192.168.0.5
+
+  nestjs:
+    build:
+      context: ./backend-nestjs/
+      dockerfile: Dockerfile
+    container_name: nestjs   
+    ports:
+      - "4200:4200"
+    depends_on:
+      - redis
+      - postgres
+      - fastapi
+    environment:
+      - DATABASE_URL=postgresql://postgres:inal_2411@46.148.238.16:5432/filmflood
+      - AWS_ACCESS_KEY=7ebb4591a88b443da347c1ec82a98abe
+      - AWS_SECRET_ACCESS_KEY=fd80602fc4364615b8f923242be2b803
+      - AWS_S3_REGION=ru-1
+      - AWS_ENDPOINT=https://s3.ru-1.storage.selcloud.ru    
+    networks:
+      dev:
+        ipv4_address: 192.168.0.6    
+
+  nextjs:
+      build:
+        context: ./frontend-nextjs/
+        dockerfile: Dockerfile
+      container_name: nextjs
+      ports:
+      - "3000:3000"
+      depends_on:
+      - fastapi
+      - nestjs   
+      networks:
+        dev:
+          ipv4_address: 192.168.0.7        

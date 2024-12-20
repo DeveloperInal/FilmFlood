@@ -1,0 +1,32 @@
+model KinoTable {
+  id          String       @id @default(uuid())
+  film_name   String       @unique // Название фильма
+  description String       // Описание
+  year_prod   Int          // Год выхода
+  country     String       // Страна
+  actors      FilmActor[]  // Связь с FilmActor
+  genres      Genre[]      // Прямая связь с Genre
+}
+
+model Actor {
+  id          String       @id @default(uuid())
+  name        String       @unique // Имя актера
+  date_of_birth String     // Дата рождения
+  height      Int          // Рост
+  biography   String       // Биография
+  films       FilmActor[]  // Связь с FilmActor
+}
+
+model Genre {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  films       KinoTable[]  // Прямая связь с KinoTable
+}
+
+model FilmActor {
+  id       String     @id @default(uuid())
+  film     KinoTable  @relation(fields: [filmId], references: [id])
+  actor    Actor      @relation(fields: [actorId], references: [id])
+  filmId   String
+  actorId  String
+}
