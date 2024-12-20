@@ -15,6 +15,8 @@ FROM nginx:stable-alpine
 COPY --from=build  .next /usr/share/nginx/html
 COPY --from=build nginx.conf /etc/nginx/conf.d/default.conf
 
+ENV NEXT_TELEMETRY_DISABLED;
+
 EXPOSE 3000
 
 CMD ["nginx", "-g", "daemon off;"]
