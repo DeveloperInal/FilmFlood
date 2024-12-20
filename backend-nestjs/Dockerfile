@@ -2,16 +2,16 @@ FROM node:20-alpine
 
 WORKDIR /
 
-COPY package.json ./
+COPY package.json yarn.lock ./
 
-RUN npm install --force
+RUN yarn install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN yarn build
 
 EXPOSE 4200
 
-RUN npx prisma generate
+RUN yarn prisma generate
 
-CMD [ "npm", "run", "dev" ]
+CMD [ "yarn", "dev" ]
