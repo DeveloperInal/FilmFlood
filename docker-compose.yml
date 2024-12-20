@@ -18,7 +18,7 @@ services:
     ports:
       - "172.26.148.182:6379:6379"
     environment:
-      - REDIS_HOST=172.26.148.182
+      - REDIS_HOST=138.124.112.64
       - REDIS_PORT=6379
       - REDIS_DB=1
     networks:
@@ -41,9 +41,9 @@ services:
     image: postgres:latest
     container_name: postgres
     ports:
-      - "172.26.148.182:5432:5432"
+      - "5432:5432"
     environment:
-      - DATABASE_URL=postgresql://postgres:inal_2411@172.26.148.182:5432/filmflood
+      - DATABASE_URL=postgresql://postgres:inal_2411@138.124.112.64:5432/filmflood
       - POSTGRES_PASSWORD=inal_2411
     volumes:
       - admin-data:/var/lib/postgresql/data
@@ -57,7 +57,7 @@ services:
       dockerfile: Dockerfile
     container_name: fastapi
     ports:
-      - "172.26.148.182:8000:8000"
+      - "8000:8000"
     depends_on:
       - redis
       - postgres
@@ -77,7 +77,7 @@ services:
       - postgres
       - fastapi
     environment:
-      - DATABASE_URL=postgresql://postgres:inal_2411@46.148.238.16:5432/filmflood
+      - DATABASE_URL=postgresql://postgres:inal_2411@138.124.112.64:5432/filmflood
       - AWS_ACCESS_KEY=7ebb4591a88b443da347c1ec82a98abe
       - AWS_SECRET_ACCESS_KEY=fd80602fc4364615b8f923242be2b803
       - AWS_S3_REGION=ru-1
