@@ -4,14 +4,14 @@ WORKDIR /
 
 COPY package.json yarn.lock ./
 
-RUN yarn install --frozen-lockfile
+RUN npm install --frozen-lockfile
 
 COPY . .
 
-RUN yarn build
+RUN npm run build
 
 EXPOSE 4200
 
-RUN yarn prisma generate
+RUN npx prisma generate
 
-CMD [ "yarn", "dev" ]
+CMD [ "npm", "run", "dev" ]
