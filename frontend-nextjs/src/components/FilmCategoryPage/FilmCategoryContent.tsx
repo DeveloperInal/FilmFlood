@@ -7,6 +7,7 @@ import { useFilmStore } from "@/stores/filmData";
 
 const DynamicFilmCategoryDetails = dynamic(() => import('./FilmCategoryDetails'), {
     loading: () => <Loading />,
+    ssr: false
 })
 
 export default function FilmCategoryContent() {

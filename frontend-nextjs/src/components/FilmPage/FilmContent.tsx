@@ -7,6 +7,7 @@ import NotFound from "@/app/not-found"
 
 const DynamicFilmDetails = dynamic(() => import('./FilmDetails'), {
     loading: () => <Loading />,
+    ssr: false,
 })
 
 export default function FilmContent({ filmName }: { filmName: string }) {

@@ -7,6 +7,7 @@ import NotFound from "@/app/not-found"
 
 const DynamicActorDetails = dynamic(() => import('./ActorDetails'), {
     loading: () => <Loading />,
+    ssr: false,
 })
 
 export default function ActorContent({ actorName }: { actorName: string }) {
