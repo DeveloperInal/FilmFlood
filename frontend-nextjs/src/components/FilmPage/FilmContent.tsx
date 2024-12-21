@@ -1,14 +1,9 @@
 'use client'
 import { useEffect } from 'react'
-import dynamic from 'next/dynamic'
 import { useFilmStore } from "@/stores/filmData"
 import Loading from "@/components/ui/loading"
 import NotFound from "@/app/not-found"
-
-const DynamicFilmDetails = dynamic(() => import('./FilmDetails'), {
-    loading: () => <Loading />,
-    ssr: false,
-})
+import FilmDetails from './FilmDetails'
 
 export default function FilmContent({ filmName }: { filmName: string }) {
     const { film, loading, getFilmNameData } = useFilmStore()
@@ -25,6 +20,6 @@ export default function FilmContent({ filmName }: { filmName: string }) {
         return <NotFound />
     }
 
-    return <DynamicFilmDetails film={film} />
+    return <FilmDetails film={film} />
 }
 

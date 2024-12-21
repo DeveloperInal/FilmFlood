@@ -1,14 +1,9 @@
 'use client'
 import { useEffect } from 'react'
-import dynamic from 'next/dynamic'
 import { useFilmStore } from "@/stores/filmData"
 import Loading from "@/components/ui/loading"
 import NotFound from "@/app/not-found"
-
-const DynamicActorDetails = dynamic(() => import('./ActorDetails'), {
-    loading: () => <Loading />,
-    ssr: false,
-})
+import ActorDetails from './ActorDetails'
 
 export default function ActorContent({ actorName }: { actorName: string }) {
     const { actor, loading, getActorNameData } = useFilmStore()
@@ -25,6 +20,6 @@ export default function ActorContent({ actorName }: { actorName: string }) {
         return <NotFound />
     }
 
-    return <DynamicActorDetails actor={actor} />
+    return <ActorDetails actor={actor} />
 }
 
