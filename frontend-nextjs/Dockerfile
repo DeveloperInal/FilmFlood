@@ -5,7 +5,6 @@ WORKDIR /
 
 COPY package.json yarn.lock ./
 
-RUN yarn add @next/dynamic
 RUN yarn install --frozen-lockfile
 
 RUN yarn next telemetry disable
@@ -19,7 +18,7 @@ FROM nginx:stable-alpine
 WORKDIR /usr/share/nginx/html
 
 # Copy build output
-COPY --from=build /.next . 
+COPY --from=build /.next .
 
 # Add custom Nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
