@@ -3,11 +3,13 @@ FROM node:20-alpine AS build
 
 WORKDIR /
 
-COPY package.json ./
-RUN npm install 
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+RUN yarn next telemetry disable
 
 COPY . .
-RUN npm run build
+RUN yarn build
 
 # Stage 2: Nginx configuration
 FROM nginx:stable-alpine
