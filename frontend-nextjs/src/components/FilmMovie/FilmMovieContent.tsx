@@ -22,7 +22,7 @@ export default function FilmMovieContent({ filmName }) {
                     getFilmRandom()
                 ]);
                 setVideoUrl(url);
-                setRandomFilms(films);
+                setRandomFilms(Array.isArray(films) ? films : []);
             } catch (err) {
                 console.error("Error fetching data:", err);
                 setError(err instanceof Error ? err : new Error("An unknown error occurred"));
