@@ -3,11 +3,11 @@ FROM node:20-alpine AS build
 
 WORKDIR /
 
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+COPY package.json ./
+RUN npm install 
 
 COPY . .
-RUN yarn build
+RUN npm run build
 
 # Stage 2: Nginx configuration
 FROM nginx:stable-alpine
