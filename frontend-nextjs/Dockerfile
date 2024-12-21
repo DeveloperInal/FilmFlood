@@ -10,7 +10,7 @@ RUN yarn install --frozen-lockfile
 RUN yarn next telemetry disable
 
 COPY . .
-RUN yarn build
+RUN yarn build --production
 
 # Stage 2: Nginx configuration
 FROM nginx:stable-alpine
