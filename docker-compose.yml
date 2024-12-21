@@ -10,6 +10,7 @@ networks:
 
 volumes:
   admin-data:
+  redis_data:
 
 services:
   redis:
@@ -21,6 +22,8 @@ services:
       - REDIS_HOST=138.124.112.64
       - REDIS_PORT=6379
       - REDIS_DB=1
+    volumes:
+      - redis_data:/data  
     networks:
       dev:
         ipv4_address: 192.168.0.3
