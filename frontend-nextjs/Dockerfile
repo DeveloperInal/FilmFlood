@@ -5,7 +5,7 @@ WORKDIR /
 
 COPY package.json ./
 
-RUN yarn install
+RUN yarn install --product --ignore-engines
 
 RUN yarn next telemetry disable
 
