@@ -15,7 +15,7 @@ FROM nginx:stable-alpine
 WORKDIR /usr/share/nginx/html
 
 # Copy build output
-COPY --from=build .next . 
+COPY --from=build /.next . 
 
 # Add custom Nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
