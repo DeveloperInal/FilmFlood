@@ -5,7 +5,7 @@ WORKDIR /
 
 COPY package.json yarn.lock ./
 
-RUN yarn add next/dynamic
+RUN yarn add @next/dynamic
 RUN yarn install --frozen-lockfile
 
 RUN yarn next telemetry disable
