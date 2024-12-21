@@ -3,9 +3,9 @@ FROM node:20-alpine AS build
 
 WORKDIR /
 
-COPY package.json yarn.lock ./
+COPY package.json ./
 
-RUN yarn install --frozen-lockfile
+RUN yarn install
 
 RUN yarn next telemetry disable
 
