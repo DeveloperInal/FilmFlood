@@ -16,7 +16,7 @@ services:
     image: redis:latest
     container_name: redis
     ports:
-      - "172.26.148.182:6379:6379"
+      - "6379:6379"
     environment:
       - REDIS_HOST=138.124.112.64
       - REDIS_PORT=6379
