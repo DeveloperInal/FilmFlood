@@ -15,9 +15,9 @@ services:
     ports:
       - "6379:6379"
     environment:
-      - REDIS_HOST: 138.124.112.64
-      - REDIS_PORT: 6379
-      - REDIS_DB: 1
+      - REDIS_HOST=138.124.112.64
+      - REDIS_PORT:=6379
+      - REDIS_DB=1
     volumes:
       - redis_data:/data  
     networks:
@@ -42,8 +42,8 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - DATABASE_URL: postgresql://postgres:inal_2411@localhost:5432/filmflood
-      - POSTGRES_PASSWORD: inal_2411
+      - DATABASE_URL=postgresql://postgres:inal_2411@localhost:5432/filmflood
+      - POSTGRES_PASSWORD=inal_2411
     volumes:
       - admin-data:/var/lib/postgresql/data
     networks:
@@ -77,11 +77,11 @@ services:
       - postgres
       - nginx
     environment:
-      - DATABASE_URL: postgresql://postgres:inal_2411@localhost:5432/filmflood
-      - AWS_ACCESS_KEY: f280aec5d0cf4e258fcdefbefe5321ac
-      - AWS_SECRET_ACCESS_KEY: 3cefa4cd7b3e4350bc3d8bc9b146a062
-      - AWS_S3_REGION: ru-1
-      - AWS_ENDPOINT: https://s3.ru-1.storage.selcloud.ru    
+      - DATABASE_URL=postgresql://postgres:inal_2411@localhost:5432/filmflood
+      - AWS_ACCESS_KEY=f280aec5d0cf4e258fcdefbefe5321ac
+      - AWS_SECRET_ACCESS_KEY=3cefa4cd7b3e4350bc3d8bc9b146a062
+      - AWS_S3_REGION=ru-1
+      - AWS_ENDPOINT=https://s3.ru-1.storage.selcloud.ru    
     networks:
       - app-network   
 
@@ -93,6 +93,6 @@ services:
       ports:
       - "3000:3000"
       environment:
-        NODE_ENV: production
+        NODE_ENV=production
       networks:
         - app-network      
