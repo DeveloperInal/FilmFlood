@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Body, Param, Res } from '@nestjs/common';
 import { FilmResService } from './film_res.service';
-import { addFilmDto } from './dtos/film_dto';
+import { addFilmDto } from './dtos/dtos';
 import { Response } from 'express';
 
 @Controller('film-res')
@@ -54,9 +54,12 @@ export class FilmResController {
     return res.json(films);
   }
 
-  @Get('get-random-film')
-  async getRandomFilm(@Res() res: Response) {
-    const film = await this.filmResService.getFilmRandom();
+  @Get('get-film-rating')
+  async getFilmRating(
+    @Res() res: Response,
+    @Param('minRating') minRating: number
+  ) {
+    const film = await this.filmResService.getFilmRating(minRating);
     return res.json(film);
   }
 }

@@ -1,32 +1,55 @@
-model KinoTable {
-  id          String       @id @default(uuid())
-  film_name   String       @unique // Название фильма
-  description String       // Описание
-  year_prod   Int          // Год выхода
-  country     String       // Страна
-  actors      FilmActor[]  // Связь с FilmActor
-  genres      Genre[]      // Прямая связь с Genre
+model FilmTable {
+  id          String       @id @default(uuid()) 
+  filmName    String       @unique @map("film_name") // Название фильма
+  description String       @unique // Описание
+  yearProd    Int          @map("year_prod") // Год выхода
+  ageRating   String       @map("age_rating") // Возрастное ограничение
+  watchTime   String       @map("watch_time") // Время просмотра
+  country     Country[]     // Страна
+  rating      Float        @default(0.0) // Рейтинг
+  comments    CommentFilm[] // Комментарии пользователей на фильме
+  actors      FilmActor[]  // Какие актеры участвуют в фильме
+  genres      Genre[]      // Жанры фильма
 }
 
 model Actor {
+  id           String       @id @default(uuid())
+  actorName    String       @unique @map("actor_name") // Имя актера
+  career       String[]     // Карьера
+  dateOfBirth  String       @map("date_of_birth") // Дата рождения
+  placeOfBirth String       @map("place_of_birth") // Место рождения
+  sex          String       // Пол
+  age          Int          // Возраст
+  growth       Int          // Рост
+  biography    String       @unique // Биография
+  films        FilmActor[]  // Связь с FilmActor
+}
+
+model Country {
   id          String       @id @default(uuid())
-  name        String       @unique // Имя актера
-  date_of_birth String     // Дата рождения
-  height      Int          // Рост
-  biography   String       // Биография
-  films       FilmActor[]  // Связь с FilmActor
+  countryName String       @unique  // Название страны
+  films       FilmTable[]  // Прямая связь с KinoTable
 }
 
 model Genre {
   id          String       @id @default(uuid())
-  name        String       @unique
-  films       KinoTable[]  // Прямая связь с KinoTable
+  genreName   String       @unique // Название жанра
+  films       FilmTable[]  // Прямая связь с KinoTable
+}
+
+model CommentFilm {
+  id       String     @id @default(uuid())
+  film     FilmTable  @relation(fields: [filmId], references: [id], onDelete: Cascade) // Фильм
+  filmId   String // Id Фильма
+  user     UserTable  @relation(fields: [userId], references: [id]) // Пользователь
+  userId   String // Id Пользователя
+  text     String // Текст комментария
 }
 
 model FilmActor {
   id       String     @id @default(uuid())
-  film     KinoTable  @relation(fields: [filmId], references: [id])
-  actor    Actor      @relation(fields: [actorId], references: [id])
-  filmId   String
-  actorId  String
+  film     FilmTable  @relation(fields: [filmId], references: [id]) // Фильм
+  actor    Actor      @relation(fields: [actorId], references: [id]) // Актер
+  filmId   String // Id Фильма
+  actorId  String // Id Актера
 }

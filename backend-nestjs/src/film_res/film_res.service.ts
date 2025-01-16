@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { addFilmDto } from './dtos/film_dto';
+import { addFilmDto } from './dtos/dtos';
 import { S3Service } from 'src/s3/s3.service';
-import { connect } from 'http2';
-import { console } from 'inspector';
 
 @Injectable()
 export class FilmResService {
@@ -14,21 +12,33 @@ export class FilmResService {
 
   async addFilm(addFilmDto: addFilmDto) {
     try {
-      const newFilm = await this.prisma.kinoTable.create({
+      const newFilm = await this.prisma.filmTable.create({
         data: {
-          film_name: addFilmDto.film_name,
+          filmName: addFilmDto.filmName,
           description: addFilmDto.description,
-          year_prod: addFilmDto.year_prod,
-          country: addFilmDto.country,
+          yearProd: addFilmDto.yearProd,
+          ageRating: addFilmDto.ageRating,
+          watchTime: addFilmDto.watchTime,
+          country: {
+            connectOrCreate: addFilmDto.country.map((country) => ({
+              where: { countryName: country }, // Подключаем страну по уникальному "name"
+              create: { countryName: country }, // Создаем страну, если ее нет
+            })),
+          },
+          rating: addFilmDto.rating,
           actors: {
             create: addFilmDto.actors.map((actor) => ({
               actor: {
                 connectOrCreate: {
-                  where: { name: actor.name }, // Если актер уже существует, подключаем его
+                  where: { actorName: actor.actorName }, // Если актер уже существует, подключаем его
                   create: {
-                    name: actor.name,
-                    date_of_birth: actor.date_of_birth,
-                    height: actor.height,
+                    actorName: actor.actorName,
+                    career: actor.career,
+                    dateOfBirth: actor.date_of_birth,
+                    placeOfBirth: actor.place_of_birth,
+                    sex: actor.sex,
+                    age: actor.age,
+                    growth: actor.growth,
                     biography: actor.biography,
                   }, // Создаем актера
                 },
@@ -37,8 +47,8 @@ export class FilmResService {
           },
           genres: {
             connectOrCreate: addFilmDto.genres.map((genreName) => ({
-              where: { name: genreName }, // Подключаем жанр по уникальному "name"
-              create: { name: genreName }, // Создаем жанр, если его нет
+              where: { genreName: genreName }, // Подключаем жанр по уникальному "name"
+              create: { genreName: genreName }, // Создаем жанр, если его нет
             })),
           },
         },
@@ -48,7 +58,13 @@ export class FilmResService {
               actor: true,
             },
           },
-          genres: true
+          genres: true,
+          country: true,
+          comments: {
+            include: {
+              user: true,
+            },
+          },
         },
       });
   
@@ -60,42 +76,27 @@ export class FilmResService {
   }
 
   async getAllFilms() {
-    const filmsData = await this.prisma.kinoTable.findMany({
+    const filmsData = await this.prisma.filmTable.findMany({
       include: {
-        genres: true
+        genres: true,
+        country: true
       }
     });
   
     const films = await Promise.all(
       filmsData.map(async (film) => {
-        try {
-          const genre = film.genres[0].name
-          const filmPoster = await this.s3Service.getFilmPosterUrl(genre, film.film_name);
+          const genre = film.genres[0].genreName
+          const filmPoster = await this.s3Service.getFilmPosterUrl(genre, film.filmName);
     
           return await {
             id: film.id,
-            film_name: film.film_name,
-            description: film.description,
-            year_prod: film.year_prod,
-            country: film.country,
-            genre,
-            PosterUrl: filmPoster.url || null, // Возвращаем null, если постер не найден
+            filmName: film.filmName,
+            yearProd: film.yearProd,
+            rating: film.rating,
+            posterUrl: filmPoster.url || null, 
           };
-        } catch (error) {
-          console.error(`Error fetching poster for film: ${film.film_name} in genre: ${film.genres[0]?.name || 'Unknown'} Error:`, error.message);
-          return await {
-            id: film.id,
-            film_name: film.film_name,
-            description: film.description,
-            year_prod: film.year_prod,
-            country: film.country,
-            genre: film.genres[0]?.name || 'Unknown',
-            PosterUrl: null, // Указываем null для постера, если произошла ошибка
-          };
-        }
-      })
+        })
     );
-  
     return films;
   }
   
@@ -103,7 +104,7 @@ export class FilmResService {
   async getActorNameInfo(actorName: string) {
     const actor = await this.prisma.actor.findFirst({
       where: {
-        name: actorName
+        actorName: actorName
       },
       include: {
         films: {
@@ -121,30 +122,35 @@ export class FilmResService {
     if (!actor) {
       throw new Error(`Актер с именем "${actorName}" не найден.`); 
     }
-    const actorPoster = await this.s3Service.getActorPosterUrl(actor.films[0].film.film_name, actor.name);
-    const filmUrl = await this.s3Service.getFilmPosterUrl(actor.films[0].film.genres[0].name, actor.films[0].film.film_name);
+    const actorPoster = await this.s3Service.getActorPosterUrl(actor.films[0].film.filmName, actor.actorName);
+    const filmUrl = await this.s3Service.getFilmPosterUrl(actor.films[0].film.genres[0].genreName, actor.films[0].film.filmName);
 
     const actorInfo = {
-      name: actor.name,
-      date_of_birth: actor.date_of_birth,
-      height: actor.height,
+      actorName: actor.actorName,
+      dateOfBirth: actor.dateOfBirth,
+      growth: actor.growth,
+      placeOfBirth: actor.placeOfBirth,
+      sex: actor.sex,
+      age: actor.age,
+      career: actor.career,
       biography: actor.biography,
-      films: {
+      films: 
+        [{
         id: actor.films[0].film.id,
-        film_name: actor.films[0].film.film_name,
-        year_prod: actor.films[0].film.year_prod,
-        PosterUrl: filmUrl,
-      },
-      PosterUrl: actorPoster.posterUrl
+        film_name: actor.films[0].film.filmName,
+        year_prod: actor.films[0].film.yearProd,
+        posterUrl: filmUrl,
+      },],
+      posterUrl: actorPoster.posterUrl || null,
     }
     return await actorInfo
   }
 
   async getFilmNameInfo(filmName: string) {
     
-    const film = await this.prisma.kinoTable.findFirst({
+    const film = await this.prisma.filmTable.findFirst({
       where: {
-        film_name: filmName
+        filmName: filmName
       },
       include: {
         genres: true,
@@ -152,124 +158,118 @@ export class FilmResService {
           include: {
             actor: true
           }
-        }
+        },
+        country: true
       },
     });
 
-    const posterUrl = await this.s3Service.getFilmPosterUrl(film.genres[0].name, film.film_name);
+    const posterUrl = await this.s3Service.getFilmPosterUrl(film.genres[0].genreName, film.filmName);
     const actorsData = await Promise.all(
-      film.actors.map(async (actor) => {
+      film.actors.map(async (actors) => {
           return {
-              name: actor.actor.name,
-              date_of_birth: actor.actor.date_of_birth,
-              PosterUrl: await this.s3Service.getActorPosterUrl(film.film_name, actor.actor.name),
+              actorName: actors.actor.actorName,
+              dateOfBirth: actors.actor.dateOfBirth,
+              posterUrl: await this.s3Service.getActorPosterUrl(film.filmName, actors.actor.actorName) || null,
           };
       })
   );
 
     const filmInfo = {
-      film_name: film.film_name,
+      filmName: film.filmName,
       description: film.description,
-      year_prod: film.year_prod,
-      country: film.country,
-      genre: film.genres[0].name,
+      yearProd: film.yearProd,
+      ageRating: film.ageRating,
+      watchTime: film.watchTime,
+      country: film.country[0].countryName,
+      rating: film.rating,
+      genre: film.genres[0].genreName,
       actorsData: actorsData,
-      PosterUrl: posterUrl.url,
+      posterUrl: posterUrl.url,
     }
-  
     return await filmInfo
   }
 
   async getUrlVideo(filmName: string) {
-    const film = await this.prisma.kinoTable.findFirst({
+    const film = await this.prisma.filmTable.findFirst({
       where: {
-        film_name: filmName
+        filmName: filmName
       },
       include: {
         genres: true,
       },
     });
 
-    const videoUrl = await this.s3Service.getVideoUrl(film.film_name, film.genres[0].name);
+    const videoUrl = await this.s3Service.getVideoUrl(film.filmName, film.genres[0].genreName);
 
     return await videoUrl
   }
 
   async getFilmForGenre(genre: string) {
-    const filmsData = await this.prisma.kinoTable.findMany({
+    const filmsData = await this.prisma.filmTable.findMany({
       where: {
         genres: {
           some: 
           {
-            name: genre
+            genreName: genre
           }
         }
       },
       include: {
-        genres: true
+        genres: true,
+        country: true
       }
     });
   
     const films = await Promise.all(
       filmsData.map(async (film) => {
-        try {
-          const genre = film.genres[0].name;
-          const filmPoster = await this.s3Service.getFilmPosterUrl(genre, film.film_name);
+          const genre = film.genres[0]?.genreName;
+          const filmPoster = await this.s3Service.getFilmPosterUrl(genre, film.filmName);
     
           return await {
             id: film.id,
-            film_name: film.film_name,
-            description: film.description,
-            year_prod: film.year_prod,
-            country: film.country,
-            genre,
-            PosterUrl: filmPoster.url || null, // Возвращаем null, если постер не найден
+            filmName: film.filmName,
+            yearProd: film.yearProd,
+            rating: film.rating,
+            posterUrl: filmPoster.url,
           };
-        } catch (error) {
-          console.error(`Error fetching poster for film: ${film.film_name} in genre: ${film.genres[0]?.name || 'Unknown'} Error:`, error.message);
-          return await {
-            id: film.id,
-            film_name: film.film_name,
-            description: film.description,
-            year_prod: film.year_prod,
-            country: film.country,
-            genre: film.genres[0]?.name || 'Unknown',
-            PosterUrl: null, // Указываем null для постера, если произошла ошибка
-          };
-        }
+        })
+    );
+    return films;
+  }
+  async getFilmRating(minRating: number): Promise<any[]> {
+    // Проверяем, что переданный рейтинг не превышает 10
+    if (minRating > 10) {
+      throw new Error('Рейтинг не может быть выше 10.');
+    }
+  
+    // Получаем фильмы с рейтингом выше или равным указанному
+    const filmsData = await this.prisma.filmTable.findMany({
+      where: {
+        rating: {
+          gte: minRating, // Фильтруем фильмы по рейтингу
+        },
+      },
+      include: {
+        genres: true,
+        country: true,
+      },
+    });
+  
+    const filmPromises = Promise.all(
+      filmsData.map(async (film) => {
+        const genre = film.genres[0]?.genreName;
+        const filmPoster = await this.s3Service.getFilmPosterUrl(genre, film.filmName);
+  
+        return {
+          id: film.id,
+          filmName: film.filmName,
+          yearProd: film.yearProd,
+          rating: film.rating,
+          posterUrl: filmPoster.url,
+        };
       })
     );
   
-    return films;
+    return filmPromises;
   }
-  async getFilmRandom() {
-    const filmsData = await this.prisma.kinoTable.findMany({
-        include: {
-            genres: true,
-        },
-    });
-
-    // Перемешивание массива фильмов
-    const shuffledFilms = filmsData.sort(() => 0.5 - Math.random());
-    
-    // Выбор первых 5 фильмов
-    const randomFilms = shuffledFilms.slice(0, 5);
-
-    // Обработка данных для каждого фильма
-    const filmPromises = randomFilms.map(async (film) => {
-        const genre = film.genres[0]?.name || 'unknown'; // Если жанров нет, используем 'unknown'
-        const filmPoster = await this.s3Service.getFilmPosterUrl(genre, film.film_name);
-
-        return {
-            id: film.id,
-            film_name: film.film_name,
-            year_prod: film.year_prod,
-            PosterUrl: filmPoster.url || null, // Возвращаем null, если постер не найден
-        };
-    });
-
-    // Ожидание завершения всех запросов
-    return Promise.all(filmPromises);
-}
-
 }

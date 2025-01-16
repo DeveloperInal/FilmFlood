@@ -1,9 +1,9 @@
 import {
-    Post, Get,
+    Post,
     UploadedFile,
     UseInterceptors,
     Controller,
-    Res, Param,
+    Res,
 } from '@nestjs/common';
 import { FileInterceptor } from "@nestjs/platform-express"
 import { S3Service } from "./s3.service";

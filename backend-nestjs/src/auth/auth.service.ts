@@ -4,8 +4,7 @@ import { EmailService } from './email/email.service';
 import { RedisService } from 'src/redis.service';
 import { CreateUserDto, UserDto } from './dtos/auth_user.dto';
 import { JwtService } from './jwt/jwt.service';
-import * as bcrypt from "bcrypt"
-import { Request } from 'express';
+import { hash, verify } from "argon2";
 
 @Injectable()
 export class AuthService {
@@ -18,8 +17,7 @@ export class AuthService {
 
     async registerUser(CreateUserDto: CreateUserDto) {
         const { username, email, password } = CreateUserDto;
-        const salt = await bcrypt.genSalt(10);
-        const hashPassword = await bcrypt.hash(password, salt);
+        const hashPassword = await hash(password);
         const user_candidate = await this.prisma.userTable.findFirst({ where: { email: email } })
 
         if(user_candidate) {
@@ -30,7 +28,6 @@ export class AuthService {
             username, 
             email, 
             password: hashPassword,
-            updatedAt: new Date(),
         };
         
         const code = await this.email.sendEmail(email); // Отправляем код на почту
@@ -39,7 +36,7 @@ export class AuthService {
 
     async validateUser(username: string, password: string, email: string): Promise<any> { // Функция для валидации пользователя и на его существование
         const user = await this.prisma.userTable.findFirst({ where: { username, email } })
-        if (user && await bcrypt.compare(password, user.password)) {
+        if (user && await verify(password, user.password)) {
             const { password, ...result } = user;
             return result;
         }
@@ -81,7 +78,7 @@ export class AuthService {
         if(!user) {
             throw new BadRequestException(`Пользователь с таким email не найден!`)
         }
-        const isPasswordEquals = await bcrypt.compare(password, user.password)
+        const isPasswordEquals = await verify(user.password, password)
         if(!isPasswordEquals) {
             throw new BadRequestException('Пароли не совпадают!')
         }

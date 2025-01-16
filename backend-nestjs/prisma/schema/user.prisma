@@ -1,17 +1,18 @@
 model UserTable {
-  id        String        @id @default(cuid())
-  email     String        @unique
-  is_follow Boolean       @default(false)
-  username  String
-  password  String
-  createdAt DateTime      @default(now())
-  updatedAt DateTime
-  tokens    TokensTable[] 
+  id        String        @id @default(cuid()) 
+  email     String        @unique // Почта
+  is_follow Boolean       @default(false) // Подписка
+  username  String // Имя пользователя
+  password  String // Пароль
+  comments  CommentFilm[] // Комментарии пользователя
+  createdAt DateTime      @default(now()) @map("created_at") // Дата создания акка
+  updatedAt DateTime      @updatedAt @map("updated_at") // Дата последнего обновления данных акка
+  tokens    TokensTable[] // Токены верификации
 }
 
 model TokensTable {
   id           String     @id @default(cuid())
-  refreshToken String
-  userId       String     
-  user         UserTable  @relation(fields: [userId], references: [id]) 
+  refreshToken String // Рефреш токен
+  userId       String // Id Пользователя
+  user         UserTable  @relation(fields: [userId], references: [id]) // Пользователь
 }

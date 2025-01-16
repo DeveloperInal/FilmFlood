@@ -16,4 +16,4 @@ EXPOSE 4200
 
 RUN yarn prisma generate
 
-CMD [ "yarn", "dev" ]
+CMD [ "yarn", "prod" ]

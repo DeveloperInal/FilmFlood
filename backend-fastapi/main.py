@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from email_send.send_post_request import router as send_email_router
+from routers.send_post_request import router as email_router
 from loguru import logger
 import uvicorn
 
@@ -19,7 +19,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(send_email_router)
+app.include_router(email_router)
 
 if __name__ == '__main__':
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run(
+        app="main:app",
+        reload=True,
+        host="localhost"
+)
