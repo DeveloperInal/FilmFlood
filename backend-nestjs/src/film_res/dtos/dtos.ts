@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsArray, ValidateNested, IsDecimal } from 'class-validator';
+import { IsString, IsInt, IsArray, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class AddFilmActorDto {
@@ -48,7 +48,10 @@ export class addFilmDto {
     @IsString({ each: true })
     country: string[];
 
-    @IsDecimal({ decimal_digits: '2', force_decimal: true })
+    @IsNumber(
+        { allowInfinity: false, allowNaN: false, maxDecimalPlaces: 2 },
+        { message: 'Rating must be a valid float with up to 2 decimal places' }
+      )
     rating: number;
 
     @IsArray()

@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import EmailStr
 from loguru import logger
-from service.code_send_email import EmailSender
+from service.email.code_send_email import EmailSender
 
 email_sender = EmailSender()
 router = APIRouter(tags=['EmailService'], prefix='/api/v1')
