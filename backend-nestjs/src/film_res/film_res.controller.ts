@@ -54,7 +54,7 @@ export class FilmResController {
     return res.json(films);
   }
 
-  @Get('get-film-rating')
+  @Get('get-film-rating/:minRating')
   async getFilmRating(
     @Res() res: Response,
     @Param('minRating') minRating: number

@@ -17,6 +17,7 @@ export class FilmResService {
           filmName: addFilmDto.filmName,
           description: addFilmDto.description,
           yearProd: addFilmDto.yearProd,
+          rating: addFilmDto.rating,
           ageRating: addFilmDto.ageRating,
           watchTime: addFilmDto.watchTime,
           country: {
@@ -25,7 +26,6 @@ export class FilmResService {
               create: { countryName: country }, // Создаем страну, если ее нет
             })),
           },
-          rating: addFilmDto.rating,
           actors: {
             create: addFilmDto.actors.map((actor) => ({
               actor: {
@@ -85,8 +85,7 @@ export class FilmResService {
   
     const films = await Promise.all(
       filmsData.map(async (film) => {
-          const genre = film.genres[0].genreName
-          const filmPoster = await this.s3Service.getFilmPosterUrl(genre, film.filmName);
+          const filmPoster = await this.s3Service.getFilmPosterUrl(film.filmName);
     
           return await {
             id: film.id,
@@ -122,8 +121,8 @@ export class FilmResService {
     if (!actor) {
       throw new Error(`Актер с именем "${actorName}" не найден.`); 
     }
-    const actorPoster = await this.s3Service.getActorPosterUrl(actor.films[0].film.filmName, actor.actorName);
-    const filmUrl = await this.s3Service.getFilmPosterUrl(actor.films[0].film.genres[0].genreName, actor.films[0].film.filmName);
+    const actorPoster = await this.s3Service.getActorPosterUrl(actor.actorName);
+    const filmUrl = await this.s3Service.getFilmPosterUrl(actor.films[0].film.filmName);
 
     const actorInfo = {
       actorName: actor.actorName,
@@ -135,13 +134,14 @@ export class FilmResService {
       career: actor.career,
       biography: actor.biography,
       films: 
-        [{
+        [
+        {
         id: actor.films[0].film.id,
         film_name: actor.films[0].film.filmName,
         year_prod: actor.films[0].film.yearProd,
-        posterUrl: filmUrl,
+        posterUrl: filmUrl.url,
       },],
-      posterUrl: actorPoster.posterUrl || null,
+      posterUrl: actorPoster.url,
     }
     return await actorInfo
   }
@@ -163,13 +163,13 @@ export class FilmResService {
       },
     });
 
-    const posterUrl = await this.s3Service.getFilmPosterUrl(film.genres[0].genreName, film.filmName);
+    const posterUrl = await this.s3Service.getFilmPosterUrl(film.filmName);
     const actorsData = await Promise.all(
       film.actors.map(async (actors) => {
           return {
               actorName: actors.actor.actorName,
               dateOfBirth: actors.actor.dateOfBirth,
-              posterUrl: await this.s3Service.getActorPosterUrl(film.filmName, actors.actor.actorName) || null,
+              posterUrl: await this.s3Service.getActorPosterUrl(actors.actor.actorName) || null,
           };
       })
   );
@@ -199,7 +199,7 @@ export class FilmResService {
       },
     });
 
-    const videoUrl = await this.s3Service.getVideoUrl(film.filmName, film.genres[0].genreName);
+    const videoUrl = await this.s3Service.getVideoUrl(film.filmName);
 
     return await videoUrl
   }
@@ -222,8 +222,7 @@ export class FilmResService {
   
     const films = await Promise.all(
       filmsData.map(async (film) => {
-          const genre = film.genres[0]?.genreName;
-          const filmPoster = await this.s3Service.getFilmPosterUrl(genre, film.filmName);
+          const filmPoster = await this.s3Service.getFilmPosterUrl(film.filmName);
     
           return await {
             id: film.id,
@@ -236,29 +235,29 @@ export class FilmResService {
     );
     return films;
   }
+  
   async getFilmRating(minRating: number): Promise<any[]> {
-    // Проверяем, что переданный рейтинг не превышает 10
-    if (minRating > 10) {
-      throw new Error('Рейтинг не может быть выше 10.');
+    const ratingNumber = typeof minRating === 'string' ? parseFloat(minRating) : minRating;
+
+    if (ratingNumber > 10) {
+        throw new Error('Рейтинг не может быть выше 10.');
     }
   
-    // Получаем фильмы с рейтингом выше или равным указанному
     const filmsData = await this.prisma.filmTable.findMany({
       where: {
         rating: {
-          gte: minRating, // Фильтруем фильмы по рейтингу
+          gte: ratingNumber, 
         },
       },
       include: {
         genres: true,
-        country: true,
-      },
+        country: true
+      }
     });
   
     const filmPromises = Promise.all(
       filmsData.map(async (film) => {
-        const genre = film.genres[0]?.genreName;
-        const filmPoster = await this.s3Service.getFilmPosterUrl(genre, film.filmName);
+        const filmPoster = await this.s3Service.getFilmPosterUrl(film.filmName);
   
         return {
           id: film.id,
