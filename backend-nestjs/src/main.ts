@@ -7,7 +7,7 @@ import * as CookieParser from 'cookie-parser';
 async function bootstrap() { // Функция для запуска всего сервиса
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'http://localhost:3000', // url адрес сайта
+    origin: 'https://filmflood.ru/', // url адрес сайта
     allowedHeaders: 'Authorization, Content-Type',
     exposedHeaders: 'Authorization',
     credentials: true // разрешение на передачу cookie файлов
