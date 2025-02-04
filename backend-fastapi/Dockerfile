@@ -1,9 +1,9 @@
 FROM python:3.10.12-slim
 
-WORKDIR /
+WORKDIR /app/fastapi/
 
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml poetry.lock ./app/fastapi/
 
 
 RUN pip install poetry
