@@ -6,25 +6,26 @@ import RegStartForm from "@/components/AuthPage/Reg/RegisterStartForm";
 import CodeRegForm from "@/components/AuthPage/Reg/CodeRegForm";
 import AuthStartForm from "@/components/AuthPage/Auth/AuthStartForm";
 import CodeAuthForm from "@/components/AuthPage/Auth/CodeAuthForm";
+import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
-interface AuthModalProps {
-    onClose?: () => void;
-}
-
-const AuthModal: NextPage<AuthModalProps> = ({ onClose }) => {
+const AuthModal: NextPage = () => {
     const { createUser, authUser, verifyUser, verifyEmail, loading } = useUserStore()
     const router = useRouter();
+    const { addToast, toastComponents } = useToast();
 
-    const [currentStep, setCurrentStep] = useState('reg'); // 'login', 'register', 'code', 'success'
+    const showError = (message: string) => {
+        addToast(message, "error")
+    }
+
+    const [currentStep, setCurrentStep] = useState('reg'); // 'auth', 'reg', 'code-reg', 'code-auth', 'success-reg', 'success-auth'
 
     const handleLoginStartSubmit = async (data: { username: string, email: string, password: string}) => {
         try {
             await createUser(data.username, data.email, data.password);
-            console.log(data.username, data.email, data.password);
             setCurrentStep('code-reg');
         } catch (error) {
-            console.error("User creation failed:", error);
+            {toastComponents}
         }
     };
 
@@ -33,7 +34,7 @@ const AuthModal: NextPage<AuthModalProps> = ({ onClose }) => {
             await verifyEmail(data.code);
             setCurrentStep('success-reg');
         } catch (error) {
-            console.error("User creation failed:", error);
+            console.error("Email verification failed:", error);
         }
     }
 
@@ -43,7 +44,7 @@ const AuthModal: NextPage<AuthModalProps> = ({ onClose }) => {
             console.log(data.username, data.email, data.password);
             setCurrentStep('code-auth');
         } catch (error) {
-            console.error("User creation failed:", error);
+            console.error("Authentication failed:", error);
         }
     }
 
@@ -52,14 +53,14 @@ const AuthModal: NextPage<AuthModalProps> = ({ onClose }) => {
             await verifyUser(data.code);
             setCurrentStep('success-auth');
         } catch (error) {
-            console.error("User creation failed:", error);
+            console.error("User verification failed:", error);
             console.error("Error response:", error.response);
         }
     };
 
     useEffect(() => {
         if (currentStep === 'success-auth' || currentStep === 'success-reg') {
-            router.push('/'); // Перенаправление на главную страницу после успешной авторизации
+            router.push('/'); // Redirect to the main page after successful authentication
         }
     }, [currentStep, router]);
 
@@ -87,12 +88,12 @@ const AuthModal: NextPage<AuthModalProps> = ({ onClose }) => {
                 {renderForm()}
                 <div className="mt-4 text-center">
                     {currentStep === 'auth' && (
-                        <a className="text-blue-500 hover:underline" onClick={() => setCurrentStep('reg')}>
+                        <a className="text-blue-500 hover:underline cursor-pointer" onClick={() => setCurrentStep('reg')}>
                             Нет аккаунта? Зарегистрироваться
                         </a>
                     )}
                     {currentStep === 'reg' && (
-                        <a className="text-blue-500 hover:underline" onClick={() => setCurrentStep('auth')}>
+                        <a className="text-blue-500 hover:underline cursor-pointer" onClick={() => setCurrentStep('auth')}>
                             Уже есть аккаунт? Войти
                         </a>
                     )}

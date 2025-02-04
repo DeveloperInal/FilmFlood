@@ -20,8 +20,8 @@ export const useUserStore = create<UserDataInterface>((set) => ({
     set({loading: true, error: null});
     try {
       const response = await AuthService.verifyEmail(code)
-      localStorage.setItem('accessToken', response.accessToken);
-      console.log('Refresh token saved:', response.refreshToken);
+      localStorage.setItem('accessToken', response.tokens.accessToken);
+      localStorage.setItem('userId', response.userId);
       set({loading: false});
     } catch (error: any) {
       console.error('Error during verification:', error);
@@ -44,7 +44,8 @@ export const useUserStore = create<UserDataInterface>((set) => ({
     set({loading: true, error: null});
     try {
       const response = await AuthService.verifyUser(code)
-      localStorage.setItem('accessToken', response.accessToken);
+      localStorage.setItem('accessToken', response.tokens.accessToken);
+      localStorage.setItem('userId', response.userId);
       set({loading: false});
     } catch (error: any) {
       console.error('Error during verification:', error);
@@ -57,6 +58,7 @@ export const useUserStore = create<UserDataInterface>((set) => ({
     try {
       await AuthService.logoutUser()
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('userId');
       set({loading: false});
     } catch (error: any) {
       console.error('Error during logout:', error);

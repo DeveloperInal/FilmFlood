@@ -29,13 +29,14 @@ const CodeAuthForm: React.FC<CodeAuthFormProps> = ({ onSubmit, loading }) => {
                         className="flex h-10 w-full rounded-md border-purple-500 bg-white px-3 py-2 text-black text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                         placeholder="Введите код"
                         value={code}
+                        maxLength={6}
                         onChange={handleCodeChange}
                         autoComplete="one-time-code"
                     />
                     <button
                         type="submit"
+                        disabled={code.length !== 6 || loading}
                         className="mt-4 w-full bg-black text-white py-2 px-4 rounded transition-colors duration-300 hover:bg-purple-400 focus:outline-none"
-                        disabled={loading}
                     >
                         {loading ? "Отправка..." : "Подтвердить"}
                     </button>

@@ -3,12 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
     // Проверка на конфликты с alias
   pageExtensions: ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'],
+  output: "standalone",
 
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'film-flood-bucket.s3.ru-1.storage.selcloud.ru'
+        hostname: 'filmflood.s3.ru-1.storage.selcloud.ru'
       },
     ],
   },

@@ -1,57 +1,45 @@
-'use client';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Input } from './input';
-import { debounce } from 'lodash';
-import { Search } from 'lucide-react';
-import { useFilmStore } from '@/stores/filmData';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+"use client"
+import type React from "react"
+import { useState, useMemo, useCallback } from "react"
+import { Input } from "./input"
+import { debounce } from "lodash"
+import { Film, Search } from "lucide-react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { useQuery } from "@tanstack/react-query"
+import { FilmService } from "@/service/FilmService"
+import type { IFilmData } from "@/types/filmservice.interface"
 
 export function DynamicMovieSearch() {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const { film, getAllFilmData } = useFilmStore();
-    const router = useRouter();
-
-    const fetchMovies = useCallback(async () => {
-        try {
-            await getAllFilmData();
-        } catch (err) {
-            console.error('Failed to fetch movies:', err);
-            setError(`Failed to fetch movies: ${err instanceof Error ? err.message : String(err)}`);
-        }
-    }, [getAllFilmData]);
-
-    useEffect(() => {
-        if (!film || film.length === 0) {
-            fetchMovies();
-        }
-    }, [film, fetchMovies]);
+    const [searchTerm, setSearchTerm] = useState("")
+    const { data, error } = useQuery<IFilmData>({ queryKey: ["filmAll"], queryFn: FilmService.getAllFilmData })
+    const router = useRouter()
 
     const debouncedSetSearchTerm = useCallback(
         debounce((term: string) => {
-            setSearchTerm(term);
+            setSearchTerm(term)
         }, 300),
-        []
-    );
+        [],
+    )
 
     const filteredMovies = useMemo(() => {
-        if (!film || searchTerm.length < 2) return [];
-        return film.filter((movie) =>
-            movie.film_name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [searchTerm, film]);
+        if (!data || !Array.isArray(data)) return []
+        return data.filter((film) => film.filmName.toLowerCase().includes(searchTerm.toLowerCase()))
+    }, [searchTerm, data])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        debouncedSetSearchTerm(e.target.value);
-    };
+        debouncedSetSearchTerm(e.target.value)
+    }
 
-    const handleMovieClick = useCallback((filmName: string) => {
-        const formattedName = encodeURIComponent(filmName);
-        router.push(`/film/${formattedName}`);
-    }, [router]);
+    const handleMovieClick = useCallback(
+        (filmName: string) => {
+            const formattedName = encodeURIComponent(filmName)
+            router.push(`/film/${formattedName}`)
+        },
+        [router],
+    )
 
-    if (error) return <div>Error: {error}</div>;
+    if (error) return <div>Error: {(error as Error).message}</div>
 
     return (
         <div className="w-full max-w-md mx-auto relative">
@@ -60,33 +48,47 @@ export function DynamicMovieSearch() {
                     type="text"
                     placeholder="Search for a movie..."
                     onChange={handleInputChange}
-                    className="pl-10"
+                    className="pl-10 pr-4 py-2 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             </div>
-            {filteredMovies.length > 0 && (
-                <ul className="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg max-h-60 overflow-auto">
-                    {filteredMovies.map((movie) => (
-                        <li
-                            key={movie.id}
-                            onClick={() => handleMovieClick(movie.film_name)}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black"
-                        >
-                            <div className="flex items-center">
-                                <Image
-                                    src={movie.PosterUrl}
-                                    alt={movie.film_name}
-                                    width={40}
-                                    height={40}
-                                    className="rounded-md mr-4"
-                                    priority
-                                />
-                                <span>{movie.film_name}</span>
-                            </div>
-                        </li>
-                    ))}
+            {searchTerm && (
+                <ul className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-h-80 overflow-auto border border-gray-200 dark:border-gray-700">
+                    {filteredMovies.length > 0 ? (
+                        filteredMovies.map((film: IFilmData) => (
+                            <li
+                                key={film.id}
+                                onClick={() => handleMovieClick(film.filmName)}
+                                className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-150 ease-in-out"
+                            >
+                                <div className="flex items-center space-x-3">
+                                    {film.posterUrl ? (
+                                        <Image
+                                            src={film.posterUrl || "/placeholder.svg"}
+                                            alt={film.filmName}
+                                            width={48}
+                                            height={72}
+                                            className="rounded-md object-cover"
+                                            priority
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-18 bg-gray-200 dark:bg-gray-600 rounded-md flex items-center justify-center">
+                                            <Film size={24} className="text-gray-400 dark:text-gray-500" />
+                                        </div>
+                                    )}
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white">{film.filmName}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">{film.yearProd?.toString()}</p>
+                                    </div>
+                                </div>
+                            </li>
+                        ))
+                    ) : (
+                        <li className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">No movies found</li>
+                    )}
                 </ul>
             )}
         </div>
-    );
+    )
 }
+

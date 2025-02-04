@@ -14,11 +14,12 @@ import { EmailService } from './auth/email/email.service';
 import { S3Module } from './s3/s3.module';
 import { S3Service } from './s3/s3.service';
 import { S3Controller } from './s3/s3.controller';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true
-  }), FilmResModule, AuthModule, EmailModule, S3Module],
+  }), FilmResModule, AuthModule, EmailModule, S3Module, UserModule],
   controllers: [FilmResController, S3Controller],
   providers: [PrismaService, FilmResService, AuthService, NestJwtService, EmailService, JwtService, RedisService, S3Service],
 })

@@ -1,47 +1,35 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useFilmStore } from "@/stores/filmData";
-import NotFound from "@/app/not-found";
-import FilmMovieDetails from './FilmMovieDetails';
-import Loading from "@/components/ui/loading";
+"use client"
+import { FilmService } from "@/service/FilmService"
+import NotFound from "@/app/not-found"
+import FilmMovieDetails from "./FilmMovieDetails"
+import Loading from "@/components/ui/loading"
+import { useQuery } from "@tanstack/react-query"
+import { useToast } from "@/hooks/use-toast"
 
 export default function FilmMovieContent({ filmName }) {
-    const { getVideoUrl, getFilmRandom } = useFilmStore();
-    const [videoUrl, setVideoUrl] = useState<string | null>(null);
-    const [randomFilms, setRandomFilms] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+    const { addToast, toastComponents } = useToast()
+    const { data: videoUrl, error, isPending } = useQuery({
+        queryKey: ["videoUrl", filmName],
+        queryFn: () => FilmService.getVideoUrl(filmName),
+    })
 
-    useEffect(() => {
-        async function fetchData() {
-            setLoading(true);
-            try {
-                const [url, films] = await Promise.all([
-                    getVideoUrl(filmName),
-                    getFilmRandom()
-                ]);
-                setVideoUrl(url);
-                setRandomFilms(Array.isArray(films) ? films : []);
-            } catch (err) {
-                console.error("Error fetching data:", err);
-                setError(err instanceof Error ? err : new Error("An unknown error occurred"));
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchData();
-    }, [filmName, getVideoUrl, getFilmRandom]);
-
-    if (loading) {
-        return <Loading />;
+    if (isPending) {
+        return <Loading />
     }
 
     if (error || !videoUrl) {
-        return <NotFound />;
+        return <NotFound />
     }
 
-    return <FilmMovieDetails film_name={filmName} videoUrl={videoUrl} randomFilms={randomFilms} />;
+    const showError = (message: string) => {
+        addToast(message, "error")
+    }
+
+    return (
+        <>
+            <FilmMovieDetails film_name={filmName} videoUrl={videoUrl} showError={showError} />
+            {toastComponents}
+        </>
+    )
 }
 

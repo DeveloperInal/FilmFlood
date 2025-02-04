@@ -1,7 +1,6 @@
 model UserTable {
   id        String        @id @default(cuid()) 
   email     String        @unique // Почта
-  is_follow Boolean       @default(false) // Подписка
   username  String // Имя пользователя
   password  String // Пароль
   comments  CommentFilm[] // Комментарии пользователя

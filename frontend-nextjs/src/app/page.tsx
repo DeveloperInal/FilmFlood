@@ -1,19 +1,15 @@
-'use client'
-import './globals.css'
-import Sidebar from "@/components/Sidebar/Sidebar";
-import Header from "@/components/ui/header";
-import MoviePage from "@/components/MoviePage/MoviePage";
+"use client"
+import { Card, CardContent } from '@/components/ui/card';
+import MovieContent from '@/components/MoviePage/MovieContent';
 
-const Home = () => {
-  return (
-      <div className="flex h-screen">
-          <Sidebar/>
-          <div className="flex-1 flex flex-col">
-              <Header />
-              <MoviePage />
-          </div>
-      </div>
-  )
+export default function MoviePage() {
+    return (
+        <main className="flex-1 flex justify-center p-6">
+            <Card className="max-w-4xl w-full bg-gray-700 border-[#8B0000]">
+                <CardContent className="p-6">
+                    <MovieContent />
+                </CardContent>
+            </Card>
+        </main>
+    )
 };
-
-export default Home;

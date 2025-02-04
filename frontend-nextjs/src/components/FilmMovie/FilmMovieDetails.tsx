@@ -1,34 +1,36 @@
-import VideoPlayer from '@/components/FilmMovie/CustomPlayer/CustomPlayer'
-import FilmCard from '@/components/FilmMovie/FilmCard/FilmCard'
+import VideoPlayer from "@/components/FilmMovie/CustomPlayer/CustomPlayer"
+import { Audiowide } from "next/font/google"
+import CommentContent from "@/components/FilmMovie/Comment/CommentContent"
 
 interface FilmMovieDetailsProps {
-    film_name: string;
-    videoUrl: string;
-    randomFilms: Array<{
-        id: string;
-        film_name: string;
-        PosterUrl: string;
-        year_prod: string;
-    }>;
+    film_name: string
+    videoUrl: string
+    showError: (message: string) => void
 }
 
-export default function FilmMovieDetails({ film_name, videoUrl, randomFilms }: FilmMovieDetailsProps) {
+const audiowide = Audiowide({
+    weight: "400",
+    subsets: ["latin"],
+})
+
+export default function FilmMovieDetails({ film_name, videoUrl, showError }: FilmMovieDetailsProps) {
+    const handlePlayerError = () => {
+        const errorMessage = `Ошибка при воспроизведении видео: Ссылка на фильм не получена`
+        showError(errorMessage)
+    }
+
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="min-h-screen bg-black text-white" style={audiowide.style}>
             <main className="container mx-auto px-4 py-8">
                 <h2 className="text-3xl font-bold mb-6 text-center">{film_name}</h2>
 
                 <div className="mb-8">
-                    <VideoPlayer videoUrl={videoUrl} />
-                </div>
-
-                <h3 className="text-2xl font-bold mb-4">Рекомендуемые фильмы</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {randomFilms.map((film) => (
-                        <FilmCard key={film.id} {...film} />
-                    ))}
+                    <VideoPlayer videoUrl={videoUrl} onError={handlePlayerError} />
                 </div>
             </main>
+            <div>
+                <CommentContent filmName={film_name} />
+            </div>
         </div>
     )
 }

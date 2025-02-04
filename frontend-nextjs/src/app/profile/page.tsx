@@ -1,10 +1,13 @@
-import ProfilePage from "@/components/ProfilePage/ProfilePage";
+'use client'
+import React from 'react'
+import ProfileContent from "@/components/Profile/ProfileContent";
 
-const Profile = () => {
+const ProfilePage = () => {
     return (
-        <div>
-            <ProfilePage />
-        </div>
+        <main className="flex-1 flex justify-center p-6">
+             <ProfileContent />
+        </main>
     )
 }
-export default Profile
+
+export default ProfilePage;

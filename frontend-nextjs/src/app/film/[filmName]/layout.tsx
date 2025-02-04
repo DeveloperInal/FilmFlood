@@ -10,7 +10,7 @@ export default function FilmLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="bg-black text-white h-screen flex flex-col">
+        <div className="bg-gray-900 text-white h-screen flex flex-col">
             {children}
         </div>
     );

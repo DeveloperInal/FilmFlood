@@ -1,59 +1,61 @@
 'use client'
-import React, { useState } from "react";
+import React from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+
+interface FormData {
+    username: string;
+    email: string;
+    password: string;
+}
 
 interface RegStartFormProps {
-    onSubmit: (data: { username: string; email: string; password: string }) => void;
+    onSubmit: SubmitHandler<FormData>;
     loading: boolean;
 }
 
 const RegStartForm: React.FC<RegStartFormProps> = ({ onSubmit, loading }) => {
-    const [formData, setFormData] = useState({
-        username: '',
-        email: '',
-        password: ''
-    });
-
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = event.target;
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
-    };
-
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        onSubmit(formData);
-    };
+    const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-4">
                 <input
+                    {...register("username", { required: "Username is required" })}
                     type="text"
-                    name="username"
                     placeholder="Username..."
                     className="flex h-10 w-full rounded-md border-purple-500 bg-white px-3 py-2 text-black text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                    value={formData.username}
-                    onChange={handleChange}
                 />
+                {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>}
             </div>
             <div className="mb-4">
                 <input
+                    {...register("email", {
+                        required: "Email is required",
+                        pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "Invalid email address"
+                        }
+                    })}
                     type="email"
-                    name="email"
                     placeholder="Email..."
                     className="flex h-10 w-full rounded-md border-purple-500 bg-white px-3 py-2 text-black text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                    value={formData.email}
-                    onChange={handleChange}
                 />
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
             </div>
             <div className="mb-4">
                 <input
+                    {...register("password", {
+                        required: "Password is required",
+                        minLength: {
+                            value: 8,
+                            message: "Password must be at least 8 characters long"
+                        }
+                    })}
                     type="password"
-                    name="password"
                     placeholder="Password..."
                     className="flex h-10 w-full rounded-md border-purple-500 bg-white px-3 py-2 text-black text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                    value={formData.password}
-                    onChange={handleChange}
                 />
+                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
             </div>
             <button
                 type="submit"

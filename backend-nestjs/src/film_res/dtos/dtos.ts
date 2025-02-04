@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsArray, ValidateNested, IsNumber } from 'class-validator';
+import { IsString, IsInt, IsArray, ValidateNested, IsNumber, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class AddFilmActorDto {
@@ -31,6 +31,10 @@ class AddFilmActorDto {
 export class addFilmDto {
     @IsString()
     filmName: string;
+
+    @IsString()
+    @IsIn(['serial', 'movie'], { message: 'type must be either serial or movie' })
+    type: string;
 
     @IsString()
     description: string;

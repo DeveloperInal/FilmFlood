@@ -31,16 +31,15 @@ export class AuthController {
     @Res() res: Response
   ) {
     try {
-      const tokens = await this.authService.verifyEmailAndAuthorize(code);
+      const { tokens, userId } = await this.authService.verifyEmailAndAuthorize(code);
       res.setHeader('Authorization', `Bearer ${tokens.accessToken}`)
       res.cookie('refreshToken', tokens.refreshToken, {
-        httpOnly: true,
-        secure: true, 
+        httpOnly: false,
         sameSite: 'strict', 
         maxAge: 1_209_600_000, 
       });
 
-      return res.status(HttpStatus.CREATED).json({ message: "Регистрация прошла успешно!", tokens })
+      return res.status(HttpStatus.CREATED).json({ message: "Регистрация прошла успешно!", tokens, userId })
     } catch (error) {
       return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'Верификация провалена, пожалуйста введите код!', error });
     }
@@ -63,21 +62,19 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   async verifyUser(
     @Param('code') code: number,
-    @Res() res: Response,
-    @Req() req: Request
+    @Res() res: Response
   ) {
     try { // Функция для авторизации по коду
-    const tokens = await this.authService.verifyUserAuth(code);
+    const { tokens, userId } = await this.authService.verifyUserAuth(code);
     res.setHeader('Authorization', `Bearer ${tokens.accessToken}`)
 
     res.cookie('refreshToken', tokens.refreshToken, {
       sameSite: 'strict', 
-      httpOnly: true,
-      secure: true,
+      httpOnly: false,
       maxAge: 1_209_600_000, 
     });
 
-    return res.status(HttpStatus.CREATED).json({ message: "Авторизация прошла успешно!", tokens })
+    return res.status(HttpStatus.CREATED).json({ message: "Авторизация прошла успешно!", tokens, userId })
   } catch(error) {
     return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'Авторизация провалена, введите код еще раз!' })
   }
@@ -92,6 +89,7 @@ export class AuthController {
       const token = req.cookies['refreshToken']
       await this.authService.logoutUser(token)
       res.clearCookie('refreshToken')
+      res.clearCookie('userId')
       res.status(HttpStatus.OK).json({ message: 'Токен успешно удален' })
     } catch(error) {
       res.status(HttpStatus.BAD_REQUEST).json({ message: "Токен не найден", error })

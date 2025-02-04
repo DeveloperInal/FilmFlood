@@ -1,48 +1,42 @@
 import axios, { AxiosResponse } from "axios";
-import {IUser, IVerifyUser} from "@/service/authservice.interface";
+import {IUser, IVerifyUser} from "@/types/authservice.interface";
 
 const responseUrl = 'http://localhost:4200/api'
 axios.defaults.baseURL = responseUrl
 
-axios.interceptors.request.use(config => {
-    config.headers.Authorization = `Bearer ${localStorage.getItem('accessToken')}`;
-    return config;
-})
-
 class AuthService {
     static async createUser(username: string, email: string, password: string) {
         try {
-            const responce = await axios.post<IUser>('/auth/create-user', {username, email, password}, {
+            const response = await axios.post<IUser>('/auth/create-user', {username, email, password}, {
                 withCredentials: true,
             });
-            console.log(responce.data)
-            return responce.data;
+            return response.data;
         } catch (error) {
-            console.error(error);
+            console.error(error.message);
             throw error;
         }
     }
 
     static async authUser(username: string, email: string, password: string) {
         try {
-            const responce = await axios.post<IUser>('/auth/auth-user', {username: username, email: email, password: password}, {
+            const response = await axios.post<IUser>('/auth/auth-user', {username: username, email: email, password: password}, {
                 withCredentials: true,
             })
-            console.log(responce.data)
-            return responce.data;
+            return response.data;
         } catch (error) {
             console.error(error);
             throw error;
         }
     }
 
-    static async verifyEmail(code: number) {
+    static async verifyEmail(user_code: number) {
         try {
-            const responce = await axios.post<IVerifyUser>(`/auth/verify-email/${code}`, {
+            const response = await axios.post<IVerifyUser>(`/auth/verify-email/${user_code}`, {
                 withCredentials: true,
             })
-            console.log(responce.data)
-            return responce.data.tokens;
+            const tokens = response.data.tokens
+            const userId = response.data.userId;
+            return { userId, tokens };
         } catch (error) {
             console.error(error);
         }
@@ -50,11 +44,12 @@ class AuthService {
 
     static async verifyUser(code: number) {
         try {
-            const responce = await axios.post<IVerifyUser>(`/auth/verify-user/${code}`, {
+            const response = await axios.post<IVerifyUser>(`/auth/verify-user/${code}`, {
                 withCredentials: true,
             })
-            console.log(responce.data)
-            return responce.data.tokens;
+            const tokens = response.data.tokens
+            const userId = response.data.userId;
+            return { userId, tokens };
         } catch (error) {
             console.error(error);
             throw error;
@@ -63,11 +58,10 @@ class AuthService {
 
     static async logoutUser(): Promise<AxiosResponse<any>> {
         try {
-            const responce = await axios.post('/auth/logout-user', {
+            const response = await axios.post('/auth/logout-user', {
                 withCredentials: true,
             })
-            console.log(responce.data)
-            return responce.data;
+            return response.data;
         } catch (error) {
             console.error(error);
             throw error;

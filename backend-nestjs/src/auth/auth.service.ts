@@ -5,6 +5,7 @@ import { RedisService } from 'src/redis.service';
 import { CreateUserDto, UserDto } from './dtos/auth_user.dto';
 import { JwtService } from './jwt/jwt.service';
 import { hash, verify } from "argon2";
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -68,7 +69,7 @@ export class AuthService {
         await this.prisma.tokensTable.create({ data: { userId: userInDb.id, refreshToken: tokens.refreshToken } })
 
         await this.redis.delete(`${code}`); // Удаление пользователя из кэша после успешной авторизации
-        return tokens;
+        return { tokens, userId: userInDb.id };
     }
 
     async authUser(CreateUserDto: CreateUserDto) {
@@ -105,8 +106,10 @@ export class AuthService {
 
         await this.prisma.tokensTable.create({ data: { userId: userDto.id, refreshToken: tokens.refreshToken } })
         await this.redis.delete(`${code}`)
+
+        console.log(userDto.id)
         
-        return tokens
+        return { tokens, userId: userDto.id }
     }
 
     async logoutUser(refreshToken) {

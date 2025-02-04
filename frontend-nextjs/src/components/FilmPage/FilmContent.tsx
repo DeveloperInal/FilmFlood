@@ -1,25 +1,30 @@
-'use client'
-import { useEffect } from 'react'
-import { useFilmStore } from "@/stores/filmData"
-import Loading from "@/components/ui/loading"
-import NotFound from "@/app/not-found"
-import FilmDetails from './FilmDetails'
+'use client';
 
-export default function FilmContent({ filmName }: { filmName: string }) {
-    const { film, loading, getFilmNameData } = useFilmStore()
+import Loading from "@/components/ui/loading";
+import FilmDetails from './FilmDetails';
+import { useQuery } from "@tanstack/react-query";
+import { FilmService } from "@/service/FilmService";
 
-    useEffect(() => {
-        getFilmNameData(filmName)
-    }, [getFilmNameData, filmName])
-
-    if (loading) {
-        return <Loading />
-    }
-
-    if (!film) {
-        return <NotFound />
-    }
-
-    return <FilmDetails film={film} />
+interface FilmContentProps {
+    filmName: string;
 }
 
+const FilmContent: React.FC<FilmContentProps> = ({filmName}): JSX.Element => {
+    const { data: film, isLoading } = useQuery({
+        queryKey: ['filmName', filmName],
+        queryFn: () => FilmService.getFilmNameData(filmName),
+        throwOnError: true
+    });
+
+    if (isLoading) {
+        return <Loading />;
+    }
+
+    return (
+        <div>
+            <FilmDetails film={film} />
+        </div>
+    );
+}
+
+export default FilmContent;

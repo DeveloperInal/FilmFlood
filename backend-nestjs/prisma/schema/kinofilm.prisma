@@ -2,6 +2,7 @@ model FilmTable {
   id          String       @id @default(uuid()) 
   filmName    String       @unique @map("film_name") // Название фильма
   description String       @unique // Описание
+  type        String       // Тип фильма
   yearProd    Int          @map("year_prod") // Год выхода
   ageRating   String       @map("age_rating") // Возрастное ограничение
   watchTime   String       @map("watch_time") // Время просмотра
@@ -43,6 +44,7 @@ model CommentFilm {
   filmId   String // Id Фильма
   user     UserTable  @relation(fields: [userId], references: [id]) // Пользователь
   userId   String // Id Пользователя
+  rating   Float // Рейтинг
   text     String // Текст комментария
 }
 
