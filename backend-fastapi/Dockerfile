@@ -1,19 +1,16 @@
 FROM python:3.10.12-slim
 
-WORKDIR /app/fastapi
+WORKDIR /app
 
-# Установка Poetry
 RUN pip install --upgrade pip && \
     pip install poetry
 
-# Копируем ТОЛЬКО файлы зависимостей
 COPY pyproject.toml poetry.lock ./
 
-# Устанавливаем зависимости
+# Отключаем проверку README.md и пакетный режим
 RUN poetry config virtualenvs.create false && \
-    poetry install --no-interaction --no-ansi
+    poetry install --no-interaction --no-ansi --no-root
 
-# Копируем остальные файлы проекта
 COPY . .
 
 EXPOSE 8000

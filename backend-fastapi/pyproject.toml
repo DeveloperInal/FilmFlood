@@ -1,5 +1,6 @@
 [tool.poetry]
 name = "backend-fastapi"
+package-mode = false
 version = "0.1.0"
 description = ""
 authors = ["DeveloperInal <166642110+DeveloperInal@users.noreply.github.com>"]
