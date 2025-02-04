@@ -7,7 +7,7 @@ export class RedisService { // Класс для кэширования данн
 
   constructor() {
     this.client = new Redis({
-      host: 'redis',
+      host: 'redis://redis:6379',
       port: 6379,
     });
   }
