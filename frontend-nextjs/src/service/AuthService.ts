@@ -1,13 +1,10 @@
 import axios, { AxiosResponse } from "axios";
 import {IUser, IVerifyUser} from "@/types/authservice.interface";
 
-const responseUrl = 'http://localhost:4200/api'
-axios.defaults.baseURL = responseUrl
-
 class AuthService {
     static async createUser(username: string, email: string, password: string) {
         try {
-            const response = await axios.post<IUser>('/auth/create-user', {username, email, password}, {
+            const response = await axios.post<IUser>('/api/auth/create-user', {username, email, password}, {
                 withCredentials: true,
             });
             return response.data;
@@ -19,7 +16,7 @@ class AuthService {
 
     static async authUser(username: string, email: string, password: string) {
         try {
-            const response = await axios.post<IUser>('/auth/auth-user', {username: username, email: email, password: password}, {
+            const response = await axios.post<IUser>('/api/auth/auth-user', {username: username, email: email, password: password}, {
                 withCredentials: true,
             })
             return response.data;
@@ -31,7 +28,7 @@ class AuthService {
 
     static async verifyEmail(user_code: number) {
         try {
-            const response = await axios.post<IVerifyUser>(`/auth/verify-email/${user_code}`, {
+            const response = await axios.post<IVerifyUser>(`/api/auth/verify-email/${user_code}`, {
                 withCredentials: true,
             })
             const tokens = response.data.tokens
@@ -44,7 +41,7 @@ class AuthService {
 
     static async verifyUser(code: number) {
         try {
-            const response = await axios.post<IVerifyUser>(`/auth/verify-user/${code}`, {
+            const response = await axios.post<IVerifyUser>(`/api/auth/verify-user/${code}`, {
                 withCredentials: true,
             })
             const tokens = response.data.tokens
@@ -58,7 +55,7 @@ class AuthService {
 
     static async logoutUser(): Promise<AxiosResponse<any>> {
         try {
-            const response = await axios.post('/auth/logout-user', {
+            const response = await axios.post('/api/auth/logout-user', {
                 withCredentials: true,
             })
             return response.data;
