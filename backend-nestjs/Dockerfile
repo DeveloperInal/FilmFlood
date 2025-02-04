@@ -1,23 +1,26 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl python3 make g++ # Добавляем необходимые пакеты для сборки
 
-WORKDIR /app/nestjs/
+WORKDIR /app
 
-COPY package.json yarn.lock ./app/nestjs/
+COPY package.json yarn.lock* ./
 
-RUN yarn install --frozen-lockfile
+# Устанавливаем зависимости перед копированием исходников
+RUN yarn install --frozen-lockfile --production=false # Включаем devDependencies
 
-RUN yarn add -D @nestjs/cli
+COPY prisma ./prisma
+
+# Генерируем Prisma клиент ДО сборки приложения
+RUN yarn prisma generate
 
 COPY . .
 
 RUN yarn build
 
-RUN rm -rf ./app/nestjs/src/
+# Удаляем devDependencies после сборки
+RUN yarn install --production
 
 EXPOSE 4200
-
-RUN yarn prisma generate
 
 CMD ["node", "dist/main.js"]
