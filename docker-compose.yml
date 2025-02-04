@@ -66,6 +66,7 @@ services:
       - postgres
       - nginx
     environment:
+      - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:inal_2411@45.89.26.183:5432/filmflood
       - AWS_ACCESS_KEY=f280aec5d0cf4e258fcdefbefe5321ac
       - AWS_SECRET_ACCESS_KEY=3cefa4cd7b3e4350bc3d8bc9b146a062
@@ -79,4 +80,4 @@ services:
       ports:
       - "3000:3000"
       environment:
-        NODE_ENV: production   
+        - NODE_ENV=production

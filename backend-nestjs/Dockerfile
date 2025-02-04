@@ -8,6 +8,8 @@ COPY package.json yarn.lock ./app/nestjs/
 
 RUN yarn install --frozen-lockfile
 
+RUN yarn add -D @nestjs/cli
+
 COPY . .
 
 RUN yarn build
@@ -18,4 +20,4 @@ EXPOSE 4200
 
 RUN yarn prisma generate
 
-CMD ["yarn", "prod"]
+CMD ["node", "dist/main.js"]
