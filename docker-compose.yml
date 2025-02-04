@@ -14,8 +14,6 @@ services:
     ports:
       - "6379:6379"
     environment:
-      - REDIS_HOST=45.89.26.183
-      - REDIS_PORT=6379
       - REDIS_DB=1
     volumes:
       - redis_data:/data
@@ -74,6 +72,9 @@ services:
     environment:
       - NODE_ENV=production node dist/main.js
       - DATABASE_URL=postgresql://postgres:inal_2411@postgres:5432/filmflood
+      - REDIS_HOST=45.89.26.183
+      - REDIS_PORT=6379
+      - REDIS_DB=1
       - AWS_ACCESS_KEY=f280aec5d0cf4e258fcdefbefe5321ac
       - AWS_SECRET_ACCESS_KEY=3cefa4cd7b3e4350bc3d8bc9b146a062
       - AWS_ENDPOINT=https://s3.ru-1.storage.selcloud.ru
