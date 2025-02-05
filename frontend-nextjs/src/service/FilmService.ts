@@ -7,6 +7,8 @@ import {
     IGenreCategory
 } from "@/types/filmservice.interface";
 
+const responseUrl = 'https://filmflood.ru/'
+axios.defaults.baseURL = responseUrl
 
 export class FilmService {
     static async getAllFilmData() {

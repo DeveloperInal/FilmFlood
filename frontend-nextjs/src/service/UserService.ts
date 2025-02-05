@@ -1,6 +1,9 @@
 import axios from "axios";
 import { IUserProfile, IUserComment } from "@/types/userservice.interface"
 
+const responseUrl = 'https://filmflood.ru/'
+axios.defaults.baseURL = responseUrl
+
 axios.interceptors.request.use(config => {
     config.headers.Authorization = `Bearer ${localStorage.getItem('accessToken')}`;
     return config;

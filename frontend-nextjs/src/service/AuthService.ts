@@ -1,6 +1,9 @@
 import axios, { AxiosResponse } from "axios";
 import {IUser, IVerifyUser} from "@/types/authservice.interface";
 
+const responseUrl = 'https://filmflood.ru/'
+axios.defaults.baseURL = responseUrl
+
 class AuthService {
     static async createUser(username: string, email: string, password: string) {
         try {
