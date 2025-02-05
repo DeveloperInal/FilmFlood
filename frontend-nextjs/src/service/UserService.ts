@@ -10,7 +10,7 @@ export class UserService {
     static async getUserProfile() {
         return new Promise<IUserProfile>(res => {
             const userId = localStorage.getItem('userId');
-            axios.get<IUserProfile>(`/api/user/profile/${userId}`, {
+            axios.get<IUserProfile>(`api/user/profile/${userId}`, {
                 withCredentials: true,
             })
                .then(response => res(response.data))
@@ -24,7 +24,7 @@ export class UserService {
     static async createUserComment(comment: { filmName: string; rating: number; text: string }) {
         return new Promise<IUserComment>((resolve, reject) => {
             const userId = localStorage.getItem('userId');
-            axios.post<IUserComment>(`/api/user/comment/${userId}`, {
+            axios.post<IUserComment>(`api/user/comment/${userId}`, {
                 filmName: comment.filmName,
                 rating: comment.rating,
                 text: comment.text,
