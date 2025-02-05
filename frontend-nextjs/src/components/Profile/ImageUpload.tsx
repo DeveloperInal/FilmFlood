@@ -38,7 +38,7 @@ export default function ImageUpload({ currentImage }: ImageUploadProps) {
 
             // Здесь должен быть ваш API endpoint для загрузки изображения
             const userId = localStorage.getItem("userId")
-            const response = await fetch(`http://localhost:4200/api/user/image/${userId}`, {
+            const response = await fetch(`api/user/image/${userId}`, {
                 method: "POST",
                 body: formData,
             })
